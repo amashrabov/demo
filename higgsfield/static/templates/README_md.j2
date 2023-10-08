@@ -1,0 +1,61 @@
+{% raw %}
+# higgsfield - AI for everyone
+
+This project was generated using Higgsfield, a framework for creating AI projects.
+To finish the setup follow the instructions below.
+
+## Setup
+
+### Create a Github repository
+
+Open up the [Github repository creation page](https://github.com/new) and create a new repository with the name of your project.
+Then copy the second line which looks like `git remote add origin ...` and run it in the root of the project.
+After that, run the following command:
+
+```bash
+git push origin main
+```
+
+### Set the deploy token into Github
+Copy the results of this command:
+
+```bash{% endraw %}
+cat ~/.ssh/higgsfield/{{ project_name }}-github-deploy.key.pub{% raw %}
+```
+
+Then on the settings page of your repository, go to the `Deploy keys` section and click on `Add deploy key`.
+
+
+### Place server details
+
+Inside `config.py` place your server details. Such as `HOSTS`, `HOSTS_USER` and `HOSTS_PORT`.
+Note that the `HOSTS` variable should be a list of strings, username and port must be the same for all hosts.
+And the key should be placed in `env` file as `SSH_KEY` variable.
+
+### Export secrets
+
+Now you should add your `SSH_KEY` and maybe other environment variables such as `WAN_DB_TOKEN` inside `env` file.
+After which you should run:
+
+```bash
+higgsfield ci encode-secrets
+```
+
+You copy the result, then put it inside Github Secrets as `HF_SECRETS`.
+Place everything you put inside the `env` into Github Secrets under name `HF_SECRETS`.
+In order to do that, go to the settings page of your repository, go to the `Secrets` section and click on `New repository secret`.
+Remember to do that whenever you change the `env` file.
+
+### Run Setup
+
+You're almost there! Run the following command in the root of the project to finish the setup.
+
+```bash
+higgsfield finish-setup
+```
+
+It will prepare servers and put the secrets for you.
+
+### Finish
+
+Go ahead and push your code to the repository. Higgsfield will automatically deploy your code to the server.{% endraw %}

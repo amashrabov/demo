@@ -1,5 +1,7 @@
 import json
 import re
+from typing import Optional
+
 import click
 import dotenv
 
@@ -46,7 +48,7 @@ def encode_secrets():
     if not env_path.exists():
         raise ValueError("env file not found")
 
-    env: str | None = None
+    env: Optional[str] = None
     with open(env_path, "r", encoding="UTF-8") as f:
         env = f.read()
 
@@ -87,7 +89,7 @@ def convert_https_to_ssh(link: str) -> str:
     return f"git@{gh}:{user}/{repo}.git"
 
 
-def parse_origin_link_or_else(link: str) -> str | None:
+def parse_origin_link_or_else(link: str) -> Optional[str]:
     if match_https_link(link):
         return convert_https_to_ssh(link)
     if link.startswith("git@github.com:"):

@@ -1,6 +1,6 @@
 import ast
 
-from typing import Any, List, Dict, Tuple
+from typing import Any, List, Dict, Tuple, Optional
 
 
 def func_defs(module: ast.Module) -> List[ast.FunctionDef]:
@@ -35,7 +35,7 @@ class Dec:
         self,
         name: str,
         allowed_args: Dict[str, Tuple[type, ...]],
-        arg_pairs: Dict[str, Any] | None = None,
+        arg_pairs: Optional[Dict[str, Any]] = None,
     ):
         self.name = name
         self.allowed_args = allowed_args
@@ -95,8 +95,8 @@ type_dict = {
 
 def build_experiment_def(
     node: ast.FunctionDef,
-) -> Tuple[Expdec, Dict[str, Paramdec]] | None:
-    experiment: Expdec | None = None
+) -> Optional[Tuple[Expdec, Dict[str, Paramdec]]] :
+    experiment: Optional[Expdec] = None
     params: Dict[str, Paramdec] = dict()
     stop = False
 
@@ -104,7 +104,7 @@ def build_experiment_def(
         if not isinstance(maybe_decorator, ast.Call):
             continue
         decorator: ast.Call = maybe_decorator  # type: ignore
-        func: ast.Name | None = getattr(decorator, "func", None)
+        func: Optional[ast.Name] = getattr(decorator, "func", None)
 
         if func is None:
             stop = True
@@ -187,11 +187,11 @@ def build_experiment_defs(
 
 
 def parse_experiments(filename: str) -> List[Tuple[Expdec, Dict[str, Paramdec]]]:
-    parsed_code: ast.Module | None = None
+    parsed_code: Optional[ast.Module] = None
     with open(filename, "r") as f:
         parsed_code = ast.parse(f.read())
 
-    if parsed_code == None:
+    if parsed_code is None:
         return []
 
     # search for top level experiment declarations

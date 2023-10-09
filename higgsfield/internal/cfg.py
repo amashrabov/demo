@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 from pydantic import BaseModel
 from pathlib import Path
 from importlib.machinery import SourceFileLoader
@@ -8,7 +8,7 @@ import dotenv
 import subprocess
 
 
-def get_key_from_path_or_key(key_or_path: str | None) -> str:
+def get_key_from_path_or_key(key_or_path: str ) -> str:
     if key_or_path is None or key_or_path == "":
         raise ValueError("SSH_KEY in env is None")
 
@@ -21,10 +21,10 @@ def get_key_from_path_or_key(key_or_path: str | None) -> str:
 
 class AppConfig(BaseModel):
     name: str
-    github_repo_url: str | None = None
+    github_repo_url: Optional[str] = None
     hosts: List[str]
     user: str
-    key: str | None
+    key: str 
     port: int
     number_of_processes_per_node: int
 
@@ -46,7 +46,7 @@ class AppConfig(BaseModel):
             ) from e
 
         name = str(module.__dict__["NAME"])
-        github_repo_url: str | None = module.__dict__.get("GITHUB_REPO_URL", None)
+        github_repo_url: str  = module.__dict__.get("GITHUB_REPO_URL", None)
         hosts = module.__dict__["HOSTS"]
         user = module.__dict__["HOSTS_USER"]
         port = module.__dict__["HOSTS_PORT"]
@@ -64,7 +64,7 @@ class AppConfig(BaseModel):
             number_of_processes_per_node=number_of_processes_per_node,
         )
 
-    def get_git_origin_url(self, path) -> str | None:
+    def get_git_origin_url(self, path) -> Optional[str]:
         if self.github_repo_url is not None:
             return self.github_repo_url
         try:
@@ -94,7 +94,7 @@ class AppConfig(BaseModel):
                 else:
                     f.write(f'GITHUB_REPO_URL = "{self.github_repo_url}"\n')
 
-    def is_valid(self) -> str | None:
+    def is_valid(self) -> Optional[str]:
         if self.github_repo_url is None:
             return "GITHUB_REPO_URL is None"
         if self.key is None:

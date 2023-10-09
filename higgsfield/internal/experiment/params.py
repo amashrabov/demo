@@ -1,5 +1,5 @@
 from pydantic import BaseModel, root_validator
-from typing import Any, List, Tuple, Dict
+from typing import Any, List, Tuple, Dict, Optional
 from yaml import safe_dump
 from higgsfield.internal.util import check_name
 
@@ -22,11 +22,11 @@ _arg_type_set = {
 
 class Param(BaseModel):
     name: str
-    default: Any | None = None
-    description: str | None = None
+    default: Optional[Any] = None
+    description: Optional[str]  = None
     required: bool = False
     type: type
-    options: Tuple[Any, ...] | None = None
+    options: Optional[Tuple[Any, ...]]  = None
 
     @root_validator(pre=True)
     def retype_default(cls, values):
@@ -72,8 +72,7 @@ class Param(BaseModel):
 
     def as_github_action(self) -> str:
         indent = "        "
-        to_join = []
-        to_join.append(f"{self.name}:")
+        to_join = [f"{self.name}:"]
         if self.description:
             # TODO: fix that yaml.safe_dump with some proper encoder, string esc etc.
             to_join.append(
@@ -120,7 +119,7 @@ class _ToSet:
     param: Param
     value: Any
 
-    def __init__(self, param: Param, value: Any | None = None):
+    def __init__(self, param: Param, value: Optional[Any] = None):
         self.param = param
         self.value = value
 

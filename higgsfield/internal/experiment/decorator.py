@@ -1,5 +1,5 @@
 from .params import Param
-from typing import Callable, Any, List, Tuple, Dict
+from typing import Callable, Any, List, Tuple, Dict, Optional, Union
 from higgsfield.internal.util import check_name
 from .ast_parser import Expdec, Paramdec
 
@@ -20,7 +20,7 @@ class ExperimentDecorator:
     params: List[Param]
     train: Callable[..., None]
 
-    def __init__(self, name: str, *, seed: int | None = None):
+    def __init__(self, name: str, *, seed: Optional[int] = None):
         """
         Composable experiment decorator.
         >> @ExperimentDecorator("my_experiment", seed=42)
@@ -53,7 +53,7 @@ class ExperimentDecorator:
             self.params.append(Param(name="seed", type=int, required=True, default=42))
         self.train = lambda: None
 
-    def __call__(self, func: Callable[..., None]) -> Callable[..., None] | None:
+    def __call__(self, func: Callable[..., None]) -> Optional[Callable[..., None]] :
         if type(func) == InnerWrap:
             # check if seed is in params:
             if not any(param.name == "seed" for param in func.param_set):
@@ -99,11 +99,11 @@ class ParamDecorator:
         self,
         name: str,
         *,
-        default: Any | None = None,
-        description: str | None = None,
+        default: Any  = None,
+        description: str  = None,
         required: bool = False,
         type: type = str,
-        options: Tuple[Any, ...] | List[Any] | None = None,
+        options: Optional[Union[Tuple[Any, ...], List[Any]]] = None,
     ):
         self.param = Param(
             name=name,

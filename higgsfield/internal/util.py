@@ -23,6 +23,5 @@ def wd_path() -> Path:
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 def templates_path() -> Path:
     return Path(ROOT_DIR) / "static" / "templates"

@@ -1,9 +1,10 @@
 import json
 import re
 import click
+import dotenv
 
 from higgsfield.internal.util import wd_path
-from higgsfield.internal.cfg import AppConfig
+from higgsfield.internal.cfg import AppConfig, get_key_from_path_or_key
 from .setup import Setup
 from base64 import b64encode, b64decode
 
@@ -26,7 +27,7 @@ def proc_per_node():
 def ssh_details():
     wd = wd_path()
     app_config = AppConfig.from_path(wd)
-    click.echo(
+    print(
         json.dumps(
             {
                 "key": app_config.key,
@@ -51,6 +52,13 @@ def encode_secrets():
 
     if env is None or len(env) == 0:
         raise ValueError("env file is empty")
+
+    values = dotenv.dotenv_values(env_path)
+    if "SSH_KEY" in values:
+        values["SSH_KEY"] = get_key_from_path_or_key(values["SSH_KEY"])
+
+    transform = lambda v: "'{}'".format(v.replace("'", "\\'"))
+    env = "\n".join([f"{k}={transform(v)}" for k, v in values.items()])
 
     click.echo(b64encode(env.encode()).decode())
 

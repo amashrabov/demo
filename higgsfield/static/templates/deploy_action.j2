@@ -26,7 +26,7 @@ jobs:
 
           pip install git+https://github.com/ml-doom/demo.git@main 
           higgsfield ci decode-secrets ${{ secrets.HF_SECRETS }}
-          eval "$(jq -r '["SSH_KEY", "USER", "PORT", "HOSTS"] as $names | . as $json | $names[] as $name | "export \($name)=\($json[$name] | @sh)";' < (higgsfield ci get-ssh-details))"
+          eval "$(jq -r '["ssh_key", "user", "port", "hosts"] as $names | . as $json | $names[] as $name | "export \($name | ascii_upcase | @sh)=\($json[$name] | @sh)"' < <(higgsfield ci get-ssh-details))"
           
           echo "HOSTS=$HOSTS" >> $GITHUB_ENV
           echo "USER=$USER" >> $GITHUB_ENV
@@ -43,10 +43,10 @@ jobs:
         sync: true {% endraw %}
         script: | 
           mkdir -p ~/higgsfield/
-          [ -d ~/higgsfield/"{{ project_name }}" ] && \
+          cd ~/higgsfield
+          [ -d ~/higgsfield"{{ project_name }}" ] && \
            (cd ~/higgsfield/"{{ project_name }}" && \
            git fetch --all && \
            git reset --hard origin/main && \
            git pull origin main) || git clone {{ repo_url }} {{ project_name }}
 
-          cd {{ project_name }}

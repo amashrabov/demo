@@ -58,7 +58,7 @@ def init(wd: Path, project_name: str):
 
     # set permissions to 400
     os.system(f"chmod 600 {hf_deploy_ssh_folder / f'{project_name}-github-deploy.key'}")
-    public_key_path = (hf_deploy_ssh_folder / f"{project_name}-github-deploy.key.pub")
+    public_key_path = hf_deploy_ssh_folder / f"{project_name}-github-deploy.key.pub"
     public_key_path.write_text(pub.decode() + "\n")
 
     # set permissions to 400
@@ -74,7 +74,7 @@ def init(wd: Path, project_name: str):
 
 
 def generate_deploy_keys() -> Tuple[bytes, bytes, paramiko.Ed25519Key]:
-    c_ed25519key = asymmetric.ed25519.Ed25519PrivateKey.generate()
+    c_ed25519key = asymmetric.ed25519.Ed25519PrivateKey.generate()  # type: ignore
     privpem = c_ed25519key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.OpenSSH,

@@ -45,7 +45,5 @@ def ci():
     pass
 
 
-ci.add_command(ci_cli.setup_nodes)
 ci.add_command(ci_cli.ssh_details)
-ci.add_command(ci_cli.encode_secrets)
 ci.add_command(ci_cli.decode_secrets)

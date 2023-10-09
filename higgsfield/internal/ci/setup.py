@@ -77,7 +77,7 @@ class Setup:
         self.group.run(f"rm -f ~/.ssh/{self.app_config.name}-github-deploy.key || true")
 
         self.group.run(
-            f"echo '{self.deploy_key}' > ~/.ssh/{self.app_config.name}-github-deploy.key"
+            f"echo '{self.deploy_key}' >> ~/.ssh/{self.app_config.name}-github-deploy.key"
         )
         self.group.run(f"chmod 400 ~/.ssh/{self.app_config.name}-github-deploy.key")
         self.group.run(f"echo '{self._build_deploy_key_string()}' > ~/.ssh/config")

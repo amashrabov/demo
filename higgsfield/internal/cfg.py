@@ -8,6 +8,17 @@ import dotenv
 import subprocess
 
 
+def get_key_from_path_or_key(key_or_path: str | None) -> str:
+    if key_or_path is None or key_or_path == "":
+        raise ValueError("SSH_KEY in env is None")
+
+    path = Path(os.path.expanduser(key_or_path)).resolve()
+    if path.exists():
+        return path.read_text()
+
+    return key_or_path
+
+
 class AppConfig(BaseModel):
     name: str
     github_repo_url: str | None = None
@@ -23,10 +34,9 @@ class AppConfig(BaseModel):
         if not config_path.exists():
             raise ValueError(f"Config file {config_path} not found")
 
-        try:
-            dotenv.load_dotenv(path / "env")
-        except Exception as e:
-            print(e)
+        if not (path / "env").exists():
+            raise ValueError(f"Env file {path/ 'env'} not found")
+        dotenv.load_dotenv(path / "env", verbose=True, override=True)
 
         try:
             module = SourceFileLoader("module.name", str(config_path)).load_module()
@@ -42,12 +52,14 @@ class AppConfig(BaseModel):
         port = module.__dict__["HOSTS_PORT"]
         number_of_processes_per_node = module.__dict__["NUMBER_OF_PROCESSES_PER_NODE"]
 
+        key = get_key_from_path_or_key(os.getenv("SSH_KEY"))
+
         return AppConfig(
             name=name,
             github_repo_url=github_repo_url,
             hosts=hosts,
             user=user,
-            key=os.getenv("SSH_KEY"),
+            key=key,
             port=port,
             number_of_processes_per_node=number_of_processes_per_node,
         )

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, root_validator
-from typing import Any, List, Tuple, Dict, Optional
+from typing import Any, List, Tuple, Dict, Optional, Type
 from yaml import safe_dump
 from higgsfield.internal.util import check_name
 
@@ -25,7 +25,7 @@ class Param(BaseModel):
     default: Optional[Any] = None
     description: Optional[str]  = None
     required: bool = False
-    type: type
+    type: Type
     options: Optional[Tuple[Any, ...]]  = None
 
     @root_validator(pre=True)

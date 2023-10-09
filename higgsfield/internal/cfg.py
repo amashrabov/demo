@@ -8,7 +8,7 @@ import dotenv
 import subprocess
 
 
-def get_key_from_path_or_key(key_or_path: str ) -> str:
+def get_key_from_path_or_key(key_or_path: Optional[str]) -> str:
     if key_or_path is None or key_or_path == "":
         raise ValueError("SSH_KEY in env is None")
 

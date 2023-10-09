@@ -31,7 +31,7 @@ def init(wd: Path, project_name: str):
         raise ValueError(f"README.md file {readme_path} already exists")
 
     source_path = Path(ROOT_DIR) / "static" / "project"
-    fileset = [
+    fileset  = [
         ".gitignore",
         "env",
         "Dockerfile",

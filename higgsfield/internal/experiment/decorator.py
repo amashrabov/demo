@@ -1,13 +1,13 @@
 from .params import Param
-from typing import Callable, Any, List, Tuple, Dict, Optional, Union
+from typing import Callable, Any, List, Tuple, Dict, Optional, Union, Set, Type
 from higgsfield.internal.util import check_name
 from .ast_parser import Expdec, Paramdec
 
 
 class InnerWrap:
-    param_set: set[Param]
+    param_set: Set[Param]
 
-    def __init__(self, func: Callable[..., None], param_set: set[Param]):
+    def __init__(self, func: Callable[..., None], param_set: Set[Param]):
         self.func = func
         self.param_set = set(param_set)
 
@@ -100,9 +100,9 @@ class ParamDecorator:
         name: str,
         *,
         default: Any  = None,
-        description: str  = None,
+        description: Optional[str] = None,
         required: bool = False,
-        type: type = str,
+        type: Type = str,
         options: Optional[Union[Tuple[Any, ...], List[Any]]] = None,
     ):
         self.param = Param(

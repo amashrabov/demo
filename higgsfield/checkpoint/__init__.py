@@ -1,1 +1,1 @@
-from fsdp_checkpoint import Checkpoint
+from .fsdp_checkpoint import Checkpoint

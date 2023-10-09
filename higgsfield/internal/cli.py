@@ -11,6 +11,32 @@ from .experiment.builder import build_all_experiment_actions
 from .ci import cli as ci_cli
 from higgsfield.internal.init import init
 
+import os
+import torch
+import torch.distributed as dist
+
+
+def setup_environ_flags(rank):
+    '''Environment flags for debugging purposes'''
+    
+    os.environ["TORCH_SHOW_CPP_STACKTRACES"] = str(1)
+    os.environ["NCCL_ASYNC_ERROR_HANDLING"] = str(1)
+    
+
+def setup(seed):
+    torch.cuda.manual_seed(seed)
+    torch.manual_seed(seed)
+
+    dist.init_process_group(backend="nccl")
+    
+    local_rank = int(os.environ["LOCAL_RANK"])
+    rank       = int(os.environ["RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
+
+    if dist.is_initialized():
+        torch.cuda.set_device(local_rank)
+        torch.cuda.empty_cache()
+        setup_environ_flags(rank) 
 
 @click.command("run")
 @click.option("--experiment_name", type=str, help="experiment name")
@@ -25,6 +51,11 @@ def run_experiment(
 ):
     wd = wd_path()
     app_config = AppConfig.from_path(wd)
+    import os
+    os.environ["PROJECT_NAME"] = app_config.name
+    os.environ["EXPERIMENT_NAME"] = experiment_name
+    os.environ["RUN_NAME"] = run_name
+    setup(42)
     Launch(wd, app_config.name, experiment_name, run_name, max_repeats, extra_args)
 
 

@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 from pydantic import BaseModel
 from pathlib import Path
 from importlib.machinery import SourceFileLoader
@@ -22,7 +22,7 @@ def get_key_from_path_or_key(key_or_path: str | None) -> str:
 class AppConfig(BaseModel):
     name: str
     github_repo_url: str | None = None
-    hosts: list[str]
+    hosts: List[str]
     user: str
     key: str | None
     port: int

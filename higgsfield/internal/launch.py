@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 from pathlib import Path
 from higgsfield.internal.experiment.decorator import _experiments
 from higgsfield.internal.experiment.params import parse_kwargs_to_params
@@ -9,7 +9,7 @@ class Launch:
     experiment_name: str
     run_name: str
     max_repeats: int
-    kwargs: dict[str, str]
+    kwargs: Dict[str, str]
     prepared: Any
 
     def __init__(
@@ -19,7 +19,7 @@ class Launch:
         experiment_name: str,
         run_name: str,
         max_repeats: int,
-        rest: list[str],
+        rest: List[str],
     ):
         if not experiment_name or experiment_name == "":
             raise ValueError("Experiment name cannot be empty")
@@ -43,7 +43,7 @@ class Launch:
         self.eval_params()
         self.apply_train()
 
-    def _parse(self, rest: list[str]):
+    def _parse(self, rest: List[str]):
         kwargs = {}
         for arg in rest:
             if "=" not in arg:

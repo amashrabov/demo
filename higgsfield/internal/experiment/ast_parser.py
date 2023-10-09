@@ -1,9 +1,9 @@
 import ast
 
-from typing import Any
+from typing import Any, List, Dict, Tuple
 
 
-def func_defs(module: ast.Module) -> list[ast.FunctionDef]:
+def func_defs(module: ast.Module) -> List[ast.FunctionDef]:
     defs = []
     for node in ast.iter_child_nodes(module):
         if isinstance(node, ast.FunctionDef):
@@ -12,13 +12,13 @@ def func_defs(module: ast.Module) -> list[ast.FunctionDef]:
     return defs
 
 
-def filter_experiment_defs(defs: list[ast.FunctionDef]):
-    filtered_defs: list[ast.FunctionDef] = []
+def filter_experiment_defs(defs: List[ast.FunctionDef]):
+    filtered_defs: List[ast.FunctionDef] = []
     for node in defs:
         try:
             if (
                 len(node.decorator_list) >= 1
-                and node.decorator_list[0].func.id == "experiment"  # type: ignore
+                and node.decorator_List[0].func.id == "experiment"  # type: ignore
             ):
                 filtered_defs.append(node)
         except Exception:
@@ -28,14 +28,14 @@ def filter_experiment_defs(defs: list[ast.FunctionDef]):
 
 class Dec:
     name: str
-    arg_pairs: dict[str, Any]
+    arg_pairs: Dict[str, Any]
     allowed_args = dict()
 
     def __init__(
         self,
         name: str,
-        allowed_args: dict[str, tuple[type, ...]],
-        arg_pairs: dict[str, Any] | None = None,
+        allowed_args: Dict[str, Tuple[type, ...]],
+        arg_pairs: Dict[str, Any] | None = None,
     ):
         self.name = name
         self.allowed_args = allowed_args
@@ -76,7 +76,7 @@ class Paramdec(Dec):
                 "required": (bool, noneType),
                 "type": (type,),
                 "options": (
-                    tuple,
+                    Tuple,
                     noneType,
                 ),
             },
@@ -95,9 +95,9 @@ type_dict = {
 
 def build_experiment_def(
     node: ast.FunctionDef,
-) -> tuple[Expdec, dict[str, Paramdec]] | None:
+) -> Tuple[Expdec, Dict[str, Paramdec]] | None:
     experiment: Expdec | None = None
-    params: dict[str, Paramdec] = dict()
+    params: Dict[str, Paramdec] = dict()
     stop = False
 
     for maybe_decorator in node.decorator_list:
@@ -174,9 +174,9 @@ def build_experiment_def(
 
 
 def build_experiment_defs(
-    defs: list[ast.FunctionDef],
-) -> list[tuple[Expdec, dict[str, Paramdec]]]:
-    exps: list[tuple[Expdec, dict[str, Paramdec]]] = list()
+    defs: List[ast.FunctionDef],
+) -> List[Tuple[Expdec, Dict[str, Paramdec]]]:
+    exps: List[Tuple[Expdec, Dict[str, Paramdec]]] = list()
     for node in defs:
         ret = build_experiment_def(node)
         if ret is not None:
@@ -186,7 +186,7 @@ def build_experiment_defs(
     return exps
 
 
-def parse_experiments(filename: str) -> list[tuple[Expdec, dict[str, Paramdec]]]:
+def parse_experiments(filename: str) -> List[Tuple[Expdec, Dict[str, Paramdec]]]:
     parsed_code: ast.Module | None = None
     with open(filename, "r") as f:
         parsed_code = ast.parse(f.read())

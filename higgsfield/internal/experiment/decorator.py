@@ -1,5 +1,5 @@
 from .params import Param
-from typing import Callable, Any
+from typing import Callable, Any, List, Tuple, Dict
 from higgsfield.internal.util import check_name
 from .ast_parser import Expdec, Paramdec
 
@@ -17,7 +17,7 @@ class InnerWrap:
 
 class ExperimentDecorator:
     name: str
-    params: list[Param]
+    params: List[Param]
     train: Callable[..., None]
 
     def __init__(self, name: str, *, seed: int | None = None):
@@ -77,8 +77,8 @@ class ExperimentDecorator:
 
     @classmethod
     def from_ast(
-        cls, ast_exps: list[tuple[Expdec, dict[str, Paramdec]]]
-    ) -> dict[str, "ExperimentDecorator"]:
+        cls, ast_exps: List[Tuple[Expdec, Dict[str, Paramdec]]]
+    ) -> Dict[str, "ExperimentDecorator"]:
         experiments = {}
         for ast_exp, ast_params in ast_exps:
             exp = cls(ast_exp.arg_pairs["name"])
@@ -103,7 +103,7 @@ class ParamDecorator:
         description: str | None = None,
         required: bool = False,
         type: type = str,
-        options: tuple[Any, ...] | list[Any] | None = None,
+        options: Tuple[Any, ...] | List[Any] | None = None,
     ):
         self.param = Param(
             name=name,
@@ -129,7 +129,7 @@ class ParamDecorator:
             )
 
     @classmethod
-    def list_from_ast(cls, ast_params: dict[str, Paramdec]):
+    def list_from_ast(cls, ast_params: Dict[str, Paramdec]):
         params = list()
         for ast_param in ast_params.values():
             param = ParamDecorator.from_ast(ast_param)
@@ -141,7 +141,7 @@ class ParamDecorator:
         return cls(**ast_param.arg_pairs)
 
 
-_experiments: dict[str, ExperimentDecorator] = {}
+_experiments: Dict[str, ExperimentDecorator] = {}
 
 
 experiment = ExperimentDecorator

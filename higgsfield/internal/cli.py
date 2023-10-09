@@ -1,3 +1,5 @@
+from typing import List
+
 import click
 
 from .util import wd_path, check_name
@@ -19,7 +21,7 @@ def run_experiment(
     experiment_name: str,
     run_name: str,
     max_repeats: int,
-    extra_args: list[str],
+    extra_args: List[str],
 ):
     wd = wd_path()
     app_config = AppConfig.from_path(wd)

@@ -1,14 +1,14 @@
 from pydantic import BaseModel, root_validator
-from typing import Any
+from typing import Any, List, Tuple, Dict
 from yaml import safe_dump
 from higgsfield.internal.util import check_name
 
 
-def build_run_params(params: list["Param"]) -> str:
+def build_run_params(params: List["Param"]) -> str:
     return " ".join(param.as_run_param() for param in params)
 
 
-def build_gh_action_inputs(params: list["Param"]) -> list[str]:
+def build_gh_action_inputs(params: List["Param"]) -> List[str]:
     return [param.as_github_action() for param in params]
 
 
@@ -26,7 +26,7 @@ class Param(BaseModel):
     description: str | None = None
     required: bool = False
     type: type
-    options: tuple[Any, ...] | None = None
+    options: Tuple[Any, ...] | None = None
 
     @root_validator(pre=True)
     def retype_default(cls, values):
@@ -130,8 +130,8 @@ class ArgParams:
 
 
 def parse_kwargs_to_params(
-    params: list[Param],
-    kwargs: dict[str, str],
+    params: List[Param],
+    kwargs: Dict[str, str],
 ):
     keys = (key[len(pfx) :] for key in kwargs if key.startswith(pfx))
 

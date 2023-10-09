@@ -54,7 +54,6 @@ class ExperimentDecorator:
         self.train = lambda x: print("this shouldn't have been called at all")
 
     def __call__(self, func: Callable[..., None]) -> Optional[Callable[..., None]] :
-        print("exp", "func", func, "type(func)", type(func))
         if type(func) == InnerWrap:
             # check if seed is in params:
             if not any(param.name == "seed" for param in func.param_set):
@@ -116,7 +115,6 @@ class ParamDecorator:
         )
 
     def __call__(self, func: Callable[..., None]) -> Callable:
-        print("par", "func", func, "type(func)", type(func))
         if type(func) == InnerWrap:
             func.add_param(self.param)
             return func

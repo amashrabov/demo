@@ -76,7 +76,7 @@ def build_all_experiment_actions(root_path: Path, project_name: str):
     actions_folder.mkdir(parents=True, exist_ok=True)
 
     # list all files that have name prefix run_experiment_ and header inside
-    for i in actions_folder.glob("run_experiment_*.yml"):
+    for i in actions_folder.glob("run_*.yml"):
         if i.read_text().startswith(header):
             i.unlink()
 
@@ -87,7 +87,7 @@ def build_all_experiment_actions(root_path: Path, project_name: str):
             params=experiment.params,
         ).render()
 
-        action_file = actions_folder / f"run_experiment_{experiment_name}.yml"
+        action_file = actions_folder / f"run_{experiment_name}.yml"
         action_file.write_text(action)
 
         print("Updated experiment action", experiment_name)

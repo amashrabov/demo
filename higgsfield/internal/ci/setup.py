@@ -98,10 +98,14 @@ class Setup:
 
         path.parent.mkdir(parents=True, exist_ok=True)
 
+        keyed_repo_url = self.app_config.github_repo_url
+        assert keyed_repo_url is not None
+        keyed_repo_url.replace("github.com/", f"github.com-{self.app_config.name}/")
+
         path.write_text(
             template.render(
                 header=header,
                 project_name=self.app_config.name,
-                repo_url=self.app_config.github_repo_url,
+                keyed_repo_url=keyed_repo_url,
             )
         )

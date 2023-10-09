@@ -18,7 +18,7 @@ def filter_experiment_defs(defs: List[ast.FunctionDef]):
         try:
             if (
                 len(node.decorator_list) >= 1
-                and node.decorator_List[0].func.id == "experiment"  # type: ignore
+                and node.decorator_list[0].func.id == "experiment"  # type: ignore
             ):
                 filtered_defs.append(node)
         except Exception:
@@ -75,10 +75,7 @@ class Paramdec(Dec):
                 "description": (str, noneType),
                 "required": (bool, noneType),
                 "type": (type,),
-                "options": (
-                    Tuple,
-                    noneType,
-                ),
+                "options": (tuple, noneType),
             },
         )
 
@@ -95,7 +92,7 @@ type_dict = {
 
 def build_experiment_def(
     node: ast.FunctionDef,
-) -> Optional[Tuple[Expdec, Dict[str, Paramdec]]] :
+) -> Optional[Tuple[Expdec, Dict[str, Paramdec]]]:
     experiment: Optional[Expdec] = None
     params: Dict[str, Paramdec] = dict()
     stop = False
@@ -105,7 +102,6 @@ def build_experiment_def(
             continue
         decorator: ast.Call = maybe_decorator  # type: ignore
         func: Optional[ast.Name] = getattr(decorator, "func", None)
-
         if func is None:
             stop = True
             break
@@ -149,6 +145,7 @@ def build_experiment_def(
                     )
                 dec.add_arg_pair(kw.arg, field_val)  # type: ignore
             except Exception as e:
+                print(e)
                 stop = True
                 break
 

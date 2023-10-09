@@ -1,5 +1,5 @@
 {{ header }}
-name: Run {{ experiment_name }} experiment
+name: Run {{ experiment_name }}
 
 on:
 {% if params|length == 0 %}
@@ -38,20 +38,14 @@ jobs:
         rm invoker-latest-linux-amd64.tar.gz
     - name: Set Port and Run Name
       run: |
-
-          echo "::add-mask::$SSH_KEY"
-          echo "::add-mask::$USER"
-          echo "::add-mask::$PORT"
-          echo "::add-mask::$HOSTS"
-
-          pip install git+https://github.com/ml-doom/demo.git@main 
-          higgsfield ci decode-secrets ${{ secrets.HF_SECRETS }}
-          eval "$(jq -r '["SSH_KEY", "USER", "PORT", "HOSTS"] as $names | . as $json | $names[] as $name | "export \($name)=\($json[$name] | @sh)";' < (higgsfield ci get-ssh-details))"
+          pip install git+https://github.com/ml-doom/demo.git@main --quiet
+          
+          echo "SSH_KEY='NOTHING'" >> env
+          eval "$(jq -r '["key", "user", "port", "hosts"] as $names | . as $json | $names[] as $name | "export \($name | ascii_upcase | @sh)=\($json[$name] | @sh)"' < <(higgsfield ci get-ssh-details))" 
           
           echo "HOSTS=$HOSTS" >> $GITHUB_ENV
           echo "USER=$USER" >> $GITHUB_ENV
           echo "PORT=$PORT" >> $GITHUB_ENV
-          echo "SSH_KEY=$SSH_KEY" >> $GITHUB_ENV
 
           echo "CHOSEN_PORT=$(invoker random-port)" >> $GITHUB_ENV
           echo "CHOSEN_RUN_NAME=$(invoker random-name)" >> $GITHUB_ENV
@@ -62,17 +56,20 @@ jobs:
         RUN_PORT: ${{ env.CHOSEN_PORT }}
         RUN_NAME: ${{ github.event.inputs.run_name || env.CHOSEN_RUN_NAME }}
         NPROC_PER_NODE: ${{ env.NPROC_PER_NODE }}
+        HOSTS: ${{ env.HOSTS }}
+        USER: ${{ env.USER }}
+        PORT: ${{ env.PORT }}
       with:
         host: ${{ env.HOSTS }}
         username: ${{ env.USER }}
-        key: ${{ env.SSH_KEY }}
+        key: ${{ secrets.SSH_KEY }}
         port: ${{ env.PORT }}
-        sync: true
+        sync: true 
         script: |
-          cd ~/higgsfield/{% endraw %}{{ project_name }} {% raw %}
-          invoker decode-secrets {% noraw %} ${{ secrets.HF_SECRETS }} {% raw  %}
+          cd ~/higgsfield/{% endraw %}{{ project_name }}
+          echo "SSH_KEY=NOTHING" > env
           invoker experiment run --project_name {{ project_name }} --experiment_name {{ experiment_name }} \ {% raw %}
-            --run_name ${{ env.RUN_NAME }} --port ${{ env.RUN_PORT }} --n_proc_per_node ${{ env.NPROC_PER_NODE }} \
+            --run_name ${{ env.RUN_NAME }} --port ${{ env.RUN_PORT }} --nproc_per_node ${{ env.NPROC_PER_NODE }} \
             --hosts ${{ env.HOSTS }} {% endraw %} {{ rest }}
 
 

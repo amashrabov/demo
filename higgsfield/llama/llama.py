@@ -34,6 +34,12 @@ from optimum.bettertransformer import BetterTransformer
 
 from higgsfield.checkpoint.fsdp_checkpoint import (
     save_distributed_model_rank0,
+    fsdp_model_state_dict_rank0,
+)
+
+from .llama_utils import (
+    load_llama_from_checkpoint,
+    load_llama_from_config,
 )
 
 class Llama(FSDP):
@@ -47,6 +53,7 @@ class Llama(FSDP):
         cpu_init_rank0=False,
         cpu_offload=False,
     ):
+        
         rank = dist.get_rank()
         
         if not checkpoint_path:
@@ -66,9 +73,7 @@ class Llama(FSDP):
                 cpu_init_rank0 = True
             
             if rank == 0:
-                model = LlamaForCausalLM.from_pretrained(model_name)
-                state_dict = torch.load(checkpoint_path)
-                model.load_state_dict(state_dict)
+                model = load_llama_from_checkpoint(model_name, checkpoint_path)
                 print("LOADED FROM CHECKPOINT")
                 
             else:
@@ -172,6 +177,7 @@ class Llama(FSDP):
         fsdp = True
         self.precision = precision
         self.fsdp = fsdp
+        self.model_name = model_name
     
     def __call__(self, batch):
         local_rank = int(os.environ["LOCAL_RANK"])
@@ -201,6 +207,34 @@ class Llama(FSDP):
         path.mkdir(exist_ok=True, parents=True)
     
         save_distributed_model_rank0(path / tail, self.model)
+        
+    def save_huggingface_model(self, save_path):
+        '''
+            Save model's weight in huggingface format to master node 
+                ~/.cache/higgsfield/{save_path}
+        '''
+        if "/" == save_path[0]:
+            save_path = save_path[1:]
+            
+        head, tail = os.path.split(save_path)
+        
+        path = Path.home() / ".cache/higgsfield" / head
+        path.mkdir(exist_ok=True, parents=True)
+        cpu_state = fsdp_model_state_dict_rank0(self)
+        
+        if dist.get_rank() == 0:
+           model = load_llama_from_config(self.model_name)
+           model.load_state_dict(cpu_state)
+           model.save_pretrained(path / tail)
+        
+    def push_to_hub(self, repo_id):
+        cpu_state = fsdp_model_state_dict_rank0(self)
+        
+        if dist.get_rank() == 0:
+           model = load_llama_from_config(self.model_name)
+           model.load_state_dict(cpu_state) 
+           model.push_to_hub(repo_id)
+        
         
     
 class Llama7b(Llama):

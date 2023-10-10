@@ -187,9 +187,9 @@ class Llama(FSDP):
             
         if self.precision == "fp16":
             with torch.cuda.amp.autocast(): 
-                loss = self.model(**batch).loss
+                loss = self(**batch).loss
         else:
-            loss = self.model(**batch).loss
+            loss = self(**batch).loss
             
         return loss
     

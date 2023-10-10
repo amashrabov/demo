@@ -1,3 +1,4 @@
+import asyncio
 import json
 import re
 from typing import Optional
@@ -123,7 +124,7 @@ def setup_nodes():
 
     try:
         setup.create_ssh_key_file()
-        setup.setup_nodes()
+        asyncio.run(setup.setup_nodes())
         setup.generate_deploy_action()
     finally:
         setup.finish()

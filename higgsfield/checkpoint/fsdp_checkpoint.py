@@ -7,24 +7,14 @@ import json
 import torch
 import torch.distributed as dist
 
-import torch.distributed._shard.checkpoint as dist_cp
-
-
 from torch.distributed.fsdp.fully_sharded_data_parallel import (
     FullyShardedDataParallel as FSDP,
 )
 
-from torch.distributed.fsdp.api import (
-    FullStateDictConfig,
-    StateDictType,
-)
-
 from optimum.bettertransformer import BetterTransformer
 
-fullstate_save_policy = FullStateDictConfig(
-    offload_to_cpu=True,
-    rank0_only=True,
-)
+from .fsdp_utils import fsdp_model_state_dict_rank0
+
 
 DEFAULT_CHECKPOINT_PATH = Path.home()  / \
                           ".cache" / \
@@ -42,7 +32,7 @@ class Checkpoint:
     def __init__(
         self,
         model,
-        optimizer,
+        optimizer=None,
         lr_scheduler=None,
         scaler=None,
     ):
@@ -56,12 +46,12 @@ class Checkpoint:
             
 
         self.save_dir     = save_dir
-        self.model        = model.model
+        self.model        = model
         self.optimizer    = optimizer
         self.lr_scheduler = lr_scheduler
         self.scaler       = scaler
     
-    def save(self, epoch, steps=0):
+    def save(self, epoch, steps=0, metadata={}):
         
         save_path = Path(self.save_dir) / f"epoch_{epoch}_steps_{steps}"
         save_path.mkdir(exist_ok=True, parents=True)
@@ -71,7 +61,9 @@ class Checkpoint:
         
         t0 = time.perf_counter()
         save_distributed_model_rank0(model_path, self.model)
-        save_distributed_optimizer_rank0(optimizer_path, self.model, self.optimizer)
+        
+        if self.optimizer:
+            save_distributed_optimizer_rank0(optimizer_path, self.model, self.optimizer)
         t1 = time.perf_counter()
 
         if int(os.environ["LOCAL_RANK"]) == 0:
@@ -87,13 +79,11 @@ class Checkpoint:
                 torch.save(self.grad_scaler.state_dict(), scaler_path)
             
             metadata_path = save_path / "metadata.json"
-            metadata = {
-                "epoch": epoch,
-                "steps": steps,
-            }
+            metadata["epoch"] = epoch
+            metadata["steps"] = steps
+
             with open(metadata_path, "w+") as jsonFile:
-                json.dump(metadata, jsonFile)
-        
+                json.dump(metadata, jsonFile) 
 
 def save_distributed_model_rank0(checkpoint_path, model):
     '''
@@ -101,10 +91,7 @@ def save_distributed_model_rank0(checkpoint_path, model):
     '''
     rank = dist.get_rank()
     
-    with FSDP.state_dict_type(
-        model, StateDictType.FULL_STATE_DICT, fullstate_save_policy
-    ):
-        cpu_state = model.state_dict()
+    cpu_state = fsdp_model_state_dict_rank0(model)
         
     if rank == 0:
         torch.save(cpu_state, checkpoint_path)
@@ -120,4 +107,3 @@ def save_distributed_optimizer_rank0(checkpoint_path, model, optimizer):
 
     if rank == 0:
         torch.save(optim_state, checkpoint_path)
-        

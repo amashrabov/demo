@@ -2,9 +2,9 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
 from higgsfield.loaders import LlamaLoader 
-from higgsfield.llama import Llama70b, Llama7b, clip_grad_norm
+from higgsfield.llama import Llama70b, Llama7b, Llama
 from higgsfield.checkpoint import Checkpoint
-from higgsfield.mixed_precision import Scaler
+from higgsfield.training import  clip_grad_norm
 
 import torch.distributed as dist
 from higgsfield.experiment import experiment, param
@@ -93,8 +93,15 @@ def train(params):
     #from pathlib import Path
     #model_path = Path.home() / ".cache/train_llama2/experiments/fanfic/checkpoints/sleepy_pasteur/epoch_0_steps_3563") / "model.pt"
     
-    model = Llama7b(
-        #model_path=model_path,
+    if params.size == "7b":
+        model_name = "meta-llama/Llama-2-7b-hf"
+    elif params.size == "13b":
+        model_name = "meta-llama/Llama-2-13b-hf"
+    elif params.size == "70b":
+        model_name = "meta-llama/Llama-2-70b-hf"
+    
+    model = Llama(
+        model_name=model_name,
         zero_stage=3,
         cpu_init_rank0=True,
         fast_attn=False,
@@ -147,29 +154,20 @@ def train(params):
         for i, batch in enumerate(train_loader):
             
             optimizer.zero_grad()
-            loss = model.step(batch)
+            loss = model(batch)
             
             if dist.get_rank() == 0:
                 print("LOSS: ", loss)
                 
             loss.backward()
-            #scaler.scale(loss).backward()
             
             clip_grad_norm(1.0, model, optimizer)
             optimizer.step()
-            #scaler.step(optimizer)
-            #scaler.update()
 
             if dist.get_rank() == 0:
                 print(loss, i, len(train_loader))
                 
             if i % 30 == 0 or i == len(train_loader) - 1:
                 checkpoint.save(epoch, i)
-            
-           # import torch.distributed as dist
-           # if dist.get_rank() == 0:
-           #     wandb.log({
-           #         "train/loss": loss.item(),
-           #     })
             
         lr_scheduler.step()

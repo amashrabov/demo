@@ -34,14 +34,13 @@ from optimum.bettertransformer import BetterTransformer
 
 from higgsfield.checkpoint.fsdp_checkpoint import (
     save_distributed_model_rank0,
-    save_distributed_optimizer_rank0,
 )
 
-class Llama:
+class Llama(FSDP):
     def __init__(
         self,
         model_name,
-        model_checkpoint_path=None,
+        checkpoint_path=None,
         zero_stage=3,
         fast_attn=False,
         precision="bf16",
@@ -50,7 +49,7 @@ class Llama:
     ):
         rank = dist.get_rank()
         
-        if not model_checkpoint_path:
+        if not checkpoint_path:
             if cpu_init_rank0: 
                 if rank == 0:
                     model = LlamaForCausalLM.from_pretrained(model_name)
@@ -63,11 +62,12 @@ class Llama:
                 model = LlamaForCausalLM.from_pretrained(model_name)
         else:
             if not cpu_init_rank0:
-                raise Exception("You can only load to cpu if checkpoint loading")
+                print("Ignoring cpu_init_rank0=False while loading model from checkpoint path")
+                cpu_init_rank0 = True
             
             if rank == 0:
                 model = LlamaForCausalLM.from_pretrained(model_name)
-                state_dict = torch.load(model_checkpoint_path)
+                state_dict = torch.load(checkpoint_path)
                 model.load_state_dict(state_dict)
                 print("LOADED FROM CHECKPOINT")
                 
@@ -144,7 +144,7 @@ class Llama:
         else:
             cpu_offload = None
 
-        model = FSDP(
+        super().__init__(
             model,
             auto_wrap_policy=wrapping_policy,
             cpu_offload=cpu_offload,
@@ -164,18 +164,16 @@ class Llama:
         check_fn = lambda submodule: isinstance(submodule, LlamaDecoderLayer)
 
         apply_activation_checkpointing(
-            model,
+            self,
             checkpoint_wrapper_fn=non_reentrant_wrapper,
             check_fn=check_fn,
         )
         
         fsdp = True
-        
-        self.model = model
         self.precision = precision
         self.fsdp = fsdp
     
-    def step(self, batch):
+    def __call__(self, batch):
         local_rank = int(os.environ["LOCAL_RANK"])
         
         for key in batch.keys():
@@ -189,47 +187,26 @@ class Llama:
             
         return loss
     
-    def parameters(self):
-        return self.model.parameters()
-    
     def save_model(self, save_path):
         '''
             Save model's weight to master node 
-                ~/.cache/higgsfield/{project_name}/{save_path}
+                ~/.cache/higgsfield/{save_path}
         '''
         if "/" == save_path[0]:
             save_path = save_path[1:]
             
         head, tail = os.path.split(save_path)
         
-        path = Path.home() / ".cache/higgsfield" / os.environ["PROJECT_NAME"] / head
+        path = Path.home() / ".cache/higgsfield" / head
         path.mkdir(exist_ok=True, parents=True)
     
         save_distributed_model_rank0(path / tail, self.model)
-        
-    def save_optimizer(self, optimizer, save_path):
-        '''
-            Save optimizer's state to master node
-                ~/.cache/higgsfield/{project_name}/{save_path}
-        '''
-        
-        if "/" == save_path[0]:
-            save_path = save_path[1:]
-            
-        head, tail = os.path.split(save_path)
-        
-        path = Path.home() / ".cache/higgsfield" / os.environ["PROJECT_NAME"] / head
-        path.mkdir(exist_ok=True, parents=True)
-        
-        
-        save_distributed_optimizer_rank0(path / tail, self.model, optimizer)
-
         
     
 class Llama7b(Llama):
     def __init__(
         self,
-        model_checkpoint_path=None,
+        checkpoint_path=None,
         zero_stage=3,
         fast_attn=False,
         precision="bf16",
@@ -239,7 +216,7 @@ class Llama7b(Llama):
         model_name = "meta-llama/Llama-2-7b-hf"
         super(Llama7b, self).__init__(
             model_name,
-            model_checkpoint_path,
+            checkpoint_path,
             zero_stage,
             fast_attn,
             precision,
@@ -250,7 +227,7 @@ class Llama7b(Llama):
 class Llama13b(Llama):
     def __init__(
         self,
-        model_checkpoint_path=None,
+        checkpoint_path=None,
         zero_stage=3,
         fast_attn=False,
         precision="bf16",
@@ -260,7 +237,7 @@ class Llama13b(Llama):
         model_name = "meta-llama/Llama-2-13b-hf"
         super(Llama13b, self).__init__(
             model_name,
-            model_checkpoint_path,
+            checkpoint_path,
             zero_stage,
             fast_attn,
             precision,
@@ -271,7 +248,7 @@ class Llama13b(Llama):
 class Llama70b(Llama):
     def __init__(
         self,
-        model_checkpoint_path=None,
+        checkpoint_path=None,
         zero_stage=3,
         fast_attn=False,
         precision="bf16",
@@ -281,22 +258,10 @@ class Llama70b(Llama):
         model_name = "meta-llama/Llama-2-70b-hf"
         super(Llama70b, self).__init__(
             model_name,
-            model_checkpoint_path,
+            checkpoint_path,
             zero_stage,
             fast_attn,
             precision,
             cpu_init_rank0,
             cpu_offload,
         )
-
-def clip_grad_norm(max_grad_norm, model, optimizer, scaler=None):
-    model = model.model
-    
-    if scaler:
-        scaler.unscale_(optimizer)
-        
-    if hasattr(optimizer, 'clip_grad_norm'):
-        optimizer.clip_grad_norm(max_grad_norm)
-        
-    elif hasattr(model.model, 'clip_grad_norm_'):
-        model.clip_grad_norm_(max_grad_norm)       

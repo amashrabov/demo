@@ -1,11 +1,29 @@
+import asyncio
 from pathlib import Path
+from typing import List
 
 from jinja2 import Environment, FileSystemLoader
 from higgsfield.internal.cfg import AppConfig
-from fabric import Connection, SerialGroup
+import asyncssh
 
 from higgsfield.internal.util import templates_path
 from higgsfield.internal.experiment.builder import header
+
+
+docker_install_script = '''/bin/bash -c "$(curl -fsSL https://gist.githubusercontent.com/arpanetus/1c1210b9e432a04dcfb494725a407a70/raw/5d47baa19b7100261a2368a43ace610528e0dfa2/install.sh)"'''
+invoker_install_script = """wget https://github.com/ml-doom/invoker/releases/download/latest/invoker-latest-linux-amd64.tar.gz && \
+        tar -xvf invoker-latest-linux-amd64.tar.gz && \
+        sudo mv invoker /usr/bin/invoker && \
+        rm invoker-latest-linux-amd64.tar.gz"""
+
+
+def deploy_key_script(key: str, project_name: str, deploy_key_string: str):
+    return f"""mkdir -p ~/.ssh && \
+    echo "{key}" > ~/.ssh/{project_name}-github-deploy.key && \
+    chmod 600 ~/.ssh/{project_name}-github-deploy.key && \
+    sudo chmod 644 ~/.ssh/config && \
+    echo "{deploy_key_string}" | sudo tee -a ~/.ssh/config
+    """
 
 
 class Setup:
@@ -30,28 +48,28 @@ class Setup:
         if self.app_config.key is None:
             raise ValueError("SSH_KEY in env is None")
 
-        with Path.home() / ".ssh" / f"{self.app_config.name}.key" as f:
+        with Path.home() / ".ssh" / f"temp-{self.app_config.name}.key" as f:
             f.write_text(self.app_config.key)
-            f.chmod(0o400)
+            f.chmod(0o600)
             self.path = str(Path.resolve(f.absolute()))
 
     def finish(self):
         Path(self.path).unlink()
 
-    def establish_connections(self):
+    async def establish_connections(self):
         if self.app_config.key is None:
             raise ValueError("SSH_KEY in env is None")
 
-        self.connections = [
-            Connection(
-                host=host,
-                port=self.app_config.port,
-                user=self.app_config.user,
-                connect_kwargs={"key_filename": self.path},
+        self.connections: List[asyncssh.SSHClientConnection] = []
+        for host in self.app_config.hosts:
+            self.connections.append(
+                await asyncssh.connect(
+                    host,
+                    port=self.app_config.port,
+                    username=self.app_config.user,
+                    client_keys=[self.path],
+                )
             )
-            for host in self.app_config.hosts
-        ]
-        self.group = SerialGroup.from_connections(self.connections)
 
     def set_deploy_key(self):
         with Path.home() / ".ssh" / "higgsfield" / f"{self.app_config.name}-github-deploy.key" as f:
@@ -60,34 +78,45 @@ class Setup:
     def _build_deploy_key_string(self):
         return f"Host github.com-{self.app_config.name}\n\tHostName github.com\n\tIdentityFile ~/.ssh/{self.app_config.name}-github-deploy.key\n\tIdentitiesOnly yes\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n\tLogLevel=ERROR\n"
 
-    def setup_nodes(self):
-        self.establish_connections()
+    async def setup_nodes(self):
+        await self.establish_connections()
 
-        # ssh into each node and install docker
-        install_docker_script = '''/bin/bash -c "$(curl -fsSL https://gist.githubusercontent.com/arpanetus/1c1210b9e432a04dcfb494725a407a70/raw/5d47baa19b7100261a2368a43ace610528e0dfa2/install.sh)"'''
-        self.group.run(install_docker_script)
+        if len(self.connections) == 0:
+            print("\n\n\nNO CONNECTIONS!!!\n\n\n")
+        
+        print("\n\n\nINSTALLING DOCKER\n\n\n")
+        async def printer(thing):
+            print(thing)
+        to_run = []
+        for conn in self.connections:
+            to_run.append(printer(await conn.run(docker_install_script)))
 
-        # ssh into each node and put deploy key for repo
-        self.group.run(f"mkdir -p ~/.ssh")
+        await asyncio.gather(*to_run)
 
+        print("\n\n\nINSTALLING INVOKER\n\n\n")
+        to_run = []
+        for conn in self.connections:
+            to_run.append(printer(await conn.run(invoker_install_script)))
+
+        await asyncio.gather(*to_run)
+
+        print("\n\n\nSETTING UP DEPLOY KEY\n\n\n")
         self.set_deploy_key()
-
-        # we need to check first if the key is already there
-        # if it is, we need to remove it
-        self.group.run(f"rm -f ~/.ssh/{self.app_config.name}-github-deploy.key || true")
-
-        self.group.run(
-            f"echo '{self.deploy_key}' > ~/.ssh/{self.app_config.name}-github-deploy.key"
+        dk_script = deploy_key_script(
+            self.deploy_key, self.app_config.name, self._build_deploy_key_string()
         )
-        self.group.run(f"chmod 400 ~/.ssh/{self.app_config.name}-github-deploy.key")
-        self.group.run(f"echo '{self._build_deploy_key_string()}' >> ~/.ssh/config")
+        to_run = []
+        for conn in self.connections:
+            to_run.append(printer(await conn.run(dk_script)))
+    
+        await asyncio.gather(*to_run)
+        
+        print("\n\n\nPULLING DOCKER IMAGE\n\n\n")
+        to_run = []
+        for conn in self.connections:
+            to_run.append(printer(await conn.run(f"docker pull higgsfield/pytorch:latest")))
 
-        self.group.run(
-            """wget https://github.com/ml-doom/invoker/releases/download/latest/invoker-latest-linux-amd64.tar.gz && \
-        tar -xvf invoker-latest-linux-amd64.tar.gz && \
-        sudo mv invoker /usr/bin/invoker && \
-        rm invoker-latest-linux-amd64.tar.gz"""
-        )
+        await asyncio.gather(*to_run)
 
     def generate_deploy_action(self):
         path = self.project_path / ".github" / "workflows" / "deploy.yml"
@@ -100,7 +129,12 @@ class Setup:
 
         keyed_repo_url = self.app_config.github_repo_url
         assert keyed_repo_url is not None
-        keyed_repo_url.replace("github.com/", f"github.com-{self.app_config.name}/")
+        # get the index of "/" after "github.com"
+        # and replace it with "-project_name:"
+
+        keyed_repo_url = keyed_repo_url.replace(
+            "github.com:", f"github.com-{self.app_config.name}:"
+        )
 
         path.write_text(
             template.render(

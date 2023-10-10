@@ -82,36 +82,3 @@ class LlamaLoader(DataLoader):
             pin_memory_device=pin_memory_device 
         )
         
-def get_llama_loader(
-    dataset,
-    batch_size_per_gpu,
-    max_sequence_length,
-    num_workers=1,
-    drop_last=True
-):
-    tokenizer = LlamaTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
-    
-    dataset = TorchCompletionDataset(
-        dataset,
-        tokenizer,
-        max_sequence_length,
-    )
-    
-    sampler = DistributedSampler(
-        dataset,
-        rank=dist.get_rank(),
-        num_replicas=dist.get_world_size(),
-        shuffle=True,
-    )
-    
-    loader = DataLoader(
-        dataset,
-        batch_size=batch_size_per_gpu,
-        num_workers=num_workers,
-        pin_memory=True,
-        sampler=sampler,
-        drop_last=drop_last,
-        collate_fn=default_data_collator,
-    )
-    
-    return loader

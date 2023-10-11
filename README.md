@@ -33,18 +33,13 @@ Machine learning проекты часто для запуска принима�
 
 Tested on Lambda, TODO
 
-<p align="center">
-    <b style="font-size:3em"> higgsfield </b>
-  <br/>
-  <br/>
-</p>
-<!-- <hr> -->
+# higgsfield
+<!-
+- <hr> -->
 <blockquote style="text-align:right;
     border-right: 2px solid #000;
     padding-right: 20px;
     margin-right: 0;" class="blockquote-right"> <i><p style="margin-right: 0;"><big>"Simplicity is prerequisite for reliability."</big></p> <footer> — Edsger W. Dijkstra</footer></i> </blockquote>
-
-<hr>
 
 
 
@@ -53,7 +48,7 @@ Tested on Lambda, TODO
   <hr>
 </p>
 
-# Installation
+#3Installation
 Just run the following command in your terminal:
 ```bash
 $ pip install higgsfield

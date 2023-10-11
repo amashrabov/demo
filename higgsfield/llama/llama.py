@@ -187,9 +187,9 @@ class Llama(FSDP):
             
         if self.precision == "fp16":
             with torch.cuda.amp.autocast(): 
-                loss = self(**batch).loss
+                loss = super().__call__(**batch).loss
         else:
-            loss = self(**batch).loss
+            loss = super().__call__(**batch).loss
             
         return loss
     
@@ -206,7 +206,7 @@ class Llama(FSDP):
         path = Path.home() / ".cache/higgsfield" / head
         path.mkdir(exist_ok=True, parents=True)
     
-        save_distributed_model_rank0(path / tail, self.model)
+        save_distributed_model_rank0(path / tail, self)
         
     def save_huggingface_model(self, save_path):
         '''

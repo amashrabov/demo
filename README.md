@@ -1,12 +1,18 @@
-# Higgsfield - Multi node training without crying 
-Higgsfield unifies distributed systems, modern model parallelism like zero3 sharding and machine learning experience (MLX).
+# higgsfield - multi node training without crying
 
-Higgsfield is your go-to solution to setup LLAMA2 70B (and any other model you like) finetuning in 5 minutes on cloud provider of your choice. 
+![architecture](./docs/static/architecture.png)
 
-pip install higgsfield
-TODO: 5 lines of code
+## `installation`
+```bash
+$ pip install higgsfield
+```
 
-<Hyperlink> Setting infrastructure in 5 minutes </Hyperlink>
+## `why? 5x5`
+- **easy to setup** - 5 minutes to setup your environment and start training on your nodes.
+- **easy to use** - 5 lines of code to define an experiment.
+- **easy to scale** - 5 minutes to add a new node.
+- **easy to reproduce** - 5 minutes to reproduce an experiment.
+- **easy to track** - 5 minutes to track your experiments.
 
 
 **Flexible design** 
@@ -33,27 +39,12 @@ Machine learning проекты часто для запуска принима�
 
 Tested on Lambda, TODO
 
-# higgsfield
-<!-
-- <hr> -->
 <blockquote style="text-align:right;
     border-right: 2px solid #000;
     padding-right: 20px;
     margin-right: 0;" class="blockquote-right"> <i><p style="margin-right: 0;"><big>"Simplicity is prerequisite for reliability."</big></p> <footer> — Edsger W. Dijkstra</footer></i> </blockquote>
 
-
-
-<p align="center">
-  <b style="font-size:2em"> Tutorial </b>
-  <hr>
-</p>
-
-#3Installation
-Just run the following command in your terminal:
-```bash
-$ pip install higgsfield
-```
-<hr>
+## `tutorial`
 
 ## Initialize the project
 

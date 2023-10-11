@@ -1,7 +1,5 @@
 <p align="center">
-  <picture>
     <b style="font-size:3em"> higgsfield </b>
-  </picture>
   <br/>
   <br/>
 </p>

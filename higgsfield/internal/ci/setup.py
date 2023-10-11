@@ -119,3 +119,6 @@ class Setup:
 
         await asyncio.gather(*to_run)
 
+
+        print("\n\n\nSeems like everything is done by now. Go run your experiments.\n\n\n")
+

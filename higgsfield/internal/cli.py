@@ -88,7 +88,6 @@ def update_experiment():
 def ci():
     pass
 
-
 ci.add_command(ci_cli.proc_per_node)
 ci.add_command(ci_cli.ssh_details)
 ci.add_command(ci_cli.decode_secrets)

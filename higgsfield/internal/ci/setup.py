@@ -111,7 +111,7 @@ class Setup:
     
         await asyncio.gather(*to_run)
         
-        print("\n\n\nPULLING DOCKER IMAGE\n\n\n")
+        print("\n\n\nPULLING BASE DOCKER IMAGE\n\n\n")
         to_run = []
         for conn in self.connections:
             to_run.append(printer(await conn.run(f"docker pull higgsfield/pytorch:latest")))

@@ -31,7 +31,7 @@ def init(wd: Path, project_name: str):
         raise ValueError(f"README.md file {readme_path} already exists")
 
     source_path = Path(ROOT_DIR) / "static" / "project"
-    fileset  = [
+    fileset = [
         ".gitignore",
         "env",
         "Dockerfile",
@@ -65,12 +65,6 @@ def init(wd: Path, project_name: str):
     os.system(
         f"chmod 600 {hf_deploy_ssh_folder / f'{project_name}-github-deploy.key.pub'}"
     )
-
-    # cd into project and git init
-    os.chdir(project_path)
-    os.system("git init")
-    os.system("git add .")
-    os.system('git commit -m "Initial commit"')
 
 
 def generate_deploy_keys() -> Tuple[bytes, bytes, paramiko.Ed25519Key]:

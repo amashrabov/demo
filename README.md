@@ -54,13 +54,12 @@ You can easily orchestrate experiments and their environments, document and trac
 No need to define [600 arguments for your experiment](https://github.com/huggingface/transformers/blob/aaccf1844eccbb90cc923378e3c37a6b143d03fb/src/transformers/training_args.py#L161). No more [yaml witchcraft](https://hydra.cc/).
 You can use whatever you want, whenever you want. We just introduce a simple interface to define your experiments. We have even taken it further, now you only need to design the way to interact.
 
+## `tutorial`
 
 <blockquote style="text-align:right;
     border-right: 2px solid #000;
     padding-right: 20px;
     margin-right: 0;" class="blockquote-right"> <i><p style="margin-right: 0;"><big>"Simplicity is prerequisite for reliability."</big></p> <footer> — Edsger W. Dijkstra</footer></i> </blockquote>
-
-## `tutorial`
 
 ## Initialize the project
 

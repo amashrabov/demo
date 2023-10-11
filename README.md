@@ -14,30 +14,46 @@ $ pip install higgsfield
 - **easy to reproduce** - 5 minutes to reproduce an experiment.
 - **easy to track** - 5 minutes to track your experiments.
 
+## `train example`
+That's all you have to do in order to train LLaMa in a distributed setting:
+```python
+from higgsfield.llama import Llama70b
+from higgsfield.loaders import LlamaLoader
 
-**Flexible design** 
+import torch.optim as optim
+from alpaca import get_alpaca_data
 
-multi node training, custom fsdp, deepspeed, accelerate. But we provide our lightweight zero cognitive overhead api for training
+@experiment("alpaca")
+def train(params):
+    model = Llama70b(zero_stage=3, fast_attn=False, precision="bf16")
 
-We provide lightweight PyTorch native API
-[Code Loop example]
+    optimizer = optim.AdamW(model.parameters(), lr=1e-5, weight_decay=0.0)
 
+    dataset = get_alpaca_data(split="train")
+    train_loader = LlamaLoader(dataset, max_words=2048)
 
-**Easy to setup environment** 
-Machine learning environments are messy, nvidia drivers, different version of   pytorch, data processing libraries.  
+    for batch in train_loader:
+        optimizer.zero_grad()
+        loss = model(batch)
+        loss.backward()
+        optimizer.step()
 
-For instance, you might need to utilize the latest FSDP method from PyTorch nightly or a new version of Deepspeed for one experiment, while for another, you require a classic computer vision library for data processing that is compatible with an older PyTorch version.
+    model.push_to_hub('alpaca-70b')
+```
 
- With higgsfield you can easily orchestrate experiments and their environments, document and track the specific versions and configurations of all dependencies to ensure reproducibility.
+## `design`
+We follow the standard pytorch workflow. Thus you can incorporate anything besides what we provide, `deepspeed`, `accelerate`, or just implement your custom `pytorch` sharding from scratch. 
 
-**No cluttered configs** 
+**Enviroment hell**
 
-Machine learning проекты часто для запуска принимают огромное количество аргументов. Часто это достигает сотен аргументов, мы называем это аргумент хелл. Для примера аргументы в imagenet:
-Частичное решение это использовать конфиг файлы как в билиотеке hydra. Мы решили пойти дальше и предлогаем паттерн для дизайна интерфейса эксрпмента состоявщий из его параметров и бизнес логику которая вычисляет конечную конфигурацию в рантайм. При этом вы можете использовать удобные для вас решения в бизнес логики как yaml files, dataclasses, аргументы функции итд.
+No more different versions of pytorch, nvidia drivers, data processing libraries. 
+You can easily orchestrate experiments and their environments, document and track the specific versions and configurations of all dependencies to ensure reproducibility.
 
-**Compatibility**
+**Config hell** 
 
-Tested on Lambda, TODO
+No need to define [600 arguments for your experiment](https://github.com/huggingface/transformers/blob/aaccf1844eccbb90cc923378e3c37a6b143d03fb/src/transformers/training_args.py#L161). No more [yaml witchcraft](https://hydra.cc/).
+You can use whatever you want, whenever you want. We just introduce a simple interface to define your experiments. We have even taken it further, now you only need to design the way to interact.
+
 
 <blockquote style="text-align:right;
     border-right: 2px solid #000;

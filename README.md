@@ -59,7 +59,7 @@ Get into the project folder:
 ```bash
 $ cd my_llama_project
 ```
-Then change start editing the `env` file. It should contain the valid SSH key to your training nodes. Make sure the key exists under the given path in your machine.
+Then start editing the `env` file. It should contain the valid SSH key to your training nodes. Make sure the key exists under the given path in your machine.
 For example:
 
 ```bash

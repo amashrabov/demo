@@ -18,9 +18,10 @@ invoker_install_script = """wget https://github.com/ml-doom/invoker/releases/dow
 
 
 def deploy_key_script(key: str, project_name: str, deploy_key_string: str):
-    return f"""mkdir -p ~/.ssh && \
+    return f"""sudo mkdir -p ~/.ssh && \
     echo "{key}" > ~/.ssh/{project_name}-github-deploy.key && \
     chmod 600 ~/.ssh/{project_name}-github-deploy.key && \
+    sudo touch ~/.ssh/config && \
     sudo chmod 644 ~/.ssh/config && \
     echo "{deploy_key_string}" | sudo tee -a ~/.ssh/config
     """
@@ -118,28 +119,3 @@ class Setup:
 
         await asyncio.gather(*to_run)
 
-    def generate_deploy_action(self):
-        path = self.project_path / ".github" / "workflows" / "deploy.yml"
-
-        template = Environment(loader=FileSystemLoader(templates_path())).get_template(
-            "deploy_action.j2"
-        )
-
-        path.parent.mkdir(parents=True, exist_ok=True)
-
-        keyed_repo_url = self.app_config.github_repo_url
-        assert keyed_repo_url is not None
-        # get the index of "/" after "github.com"
-        # and replace it with "-project_name:"
-
-        keyed_repo_url = keyed_repo_url.replace(
-            "github.com:", f"github.com-{self.app_config.name}:"
-        )
-
-        path.write_text(
-            template.render(
-                header=header,
-                project_name=self.app_config.name,
-                keyed_repo_url=keyed_repo_url,
-            )
-        )

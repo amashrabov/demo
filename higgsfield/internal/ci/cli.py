@@ -1,7 +1,8 @@
 import asyncio
 import json
+from pathlib import Path
 import re
-from typing import Optional
+from typing import List, Optional
 
 import click
 import dotenv
@@ -125,6 +126,5 @@ def setup_nodes():
     try:
         setup.create_ssh_key_file()
         asyncio.run(setup.setup_nodes())
-        setup.generate_deploy_action()
     finally:
         setup.finish()

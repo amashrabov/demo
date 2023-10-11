@@ -4,19 +4,11 @@
   <br/>
 </p>
 <!-- <hr> -->
-<blockquote style="text-align:right;" class="blockquote-right"> <i><p><big>"Simplicity is prerequisite for reliability."</big></p> <footer> — Edsger W. Dijkstra</footer></i> </blockquote>
+<blockquote style="text-align:right;
+    border-right: 2px solid #000;
+    padding-right: 20px;
+    margin-right: 0;" class="blockquote-right"> <i><p style="margin-right: 0;"><big>"Simplicity is prerequisite for reliability."</big></p> <footer> — Edsger W. Dijkstra</footer></i> </blockquote>
 
-<style>
-  .blockquote-right {
-    text-align: right;
-    border-right: 2px solid #000; /* Adjust the color and width as needed */
-    padding-right: 20px; /* Adjust the padding as needed */
-    margin-right: 0;
-  }
-  .blockquote-right p {
-    margin-right: 0;
-  }
-</style>
 <hr>
 
 
@@ -66,7 +58,7 @@ For example:
 $ cat env
 SSH_KEY=~/.ssh/id_rsa
 ```
-Great! Now you should edit the `src/config.py` file. It contains the configuration of your experiments. <details>
+Great! Now you should edit the `src/config.py` file. It contains your experiments' configuration. <details>
 <summary>Example</summary>
 
 ```python

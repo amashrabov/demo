@@ -46,5 +46,7 @@ jobs:
            (cd ~/higgsfield/{{ project_name }} && \
            git fetch --all && \
            git reset --hard origin/main && \
-           git pull origin main) || git clone {{ keyed_repo_url }} {{ project_name }}
-
+           git pull origin main) || git clone {{ keyed_repo_url }} {{ project_name }} || rm -rf ~/higgsfield/{{ project_name }} && git clone {{ keyed_repo_url }} {{ project_name }}
+          
+          echo "" > env
+{{ env_gen }}

@@ -87,12 +87,17 @@ class AppConfig(BaseModel):
         # remove the GITHUB_REPO_URL line
         with open(config_path, "r") as f:
             lines = f.readlines()
+
+        # Remove all occurrences of GITHUB_REPO_URL
+        lines = [line for line in lines if "GITHUB_REPO_URL" not in line]
+
         with open(config_path, "w") as f:
-            for line in lines:
-                if line.find("GITHUB_REPO_URL") == -1:
-                    f.write(line)
-                else:
-                    f.write(f'GITHUB_REPO_URL = "{self.github_repo_url}"\n')
+            # Write back the modified lines
+            f.writelines(lines)
+
+        # Add GITHUB_REPO_URL at the end without increasing new lines
+        with open(config_path, "a") as f:
+            f.write(f'GITHUB_REPO_URL = "{self.github_repo_url}"\n')            
 
     def is_valid(self) -> Optional[str]:
         if self.github_repo_url is None:

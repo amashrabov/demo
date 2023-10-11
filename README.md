@@ -1,3 +1,38 @@
+# Higgsfield - Multi node training without crying 
+Higgsfield unifies distributed systems, modern model parallelism like zero3 sharding and machine learning experience (MLX).
+
+Higgsfield is your go-to solution to setup LLAMA2 70B (and any other model you like) finetuning in 5 minutes on cloud provider of your choice. 
+
+pip install higgsfield
+TODO: 5 lines of code
+
+<Hyperlink> Setting infrastructure in 5 minutes </Hyperlink>
+
+
+**Flexible design** 
+
+multi node training, custom fsdp, deepspeed, accelerate. But we provide our lightweight zero cognitive overhead api for training
+
+We provide lightweight PyTorch native API
+[Code Loop example]
+
+
+**Easy to setup environment** 
+Machine learning environments are messy, nvidia drivers, different version of   pytorch, data processing libraries.  
+
+For instance, you might need to utilize the latest FSDP method from PyTorch nightly or a new version of Deepspeed for one experiment, while for another, you require a classic computer vision library for data processing that is compatible with an older PyTorch version.
+
+ With higgsfield you can easily orchestrate experiments and their environments, document and track the specific versions and configurations of all dependencies to ensure reproducibility.
+
+**No cluttered configs** 
+
+Machine learning проекты часто для запуска принимают огромное количество аргументов. Часто это достигает сотен аргументов, мы называем это аргумент хелл. Для примера аргументы в imagenet:
+Частичное решение это использовать конфиг файлы как в билиотеке hydra. Мы решили пойти дальше и предлогаем паттерн для дизайна интерфейса эксрпмента состоявщий из его параметров и бизнес логику которая вычисляет конечную конфигурацию в рантайм. При этом вы можете использовать удобные для вас решения в бизнес логики как yaml files, dataclasses, аргументы функции итд.
+
+**Compatibility**
+
+Tested on Lambda, TODO
+
 <p align="center">
     <b style="font-size:3em"> higgsfield </b>
   <br/>

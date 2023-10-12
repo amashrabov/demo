@@ -2,12 +2,12 @@
 
 ![architecture](./docs/static/architecture.png)
 
-## install
+## Install
 ```bash
 $ pip install higgsfield
 ```
 
-## why?
+## Why?
 - **easy to setup** - 5 minutes to setup your environment and start training on your nodes.
 - **easy to use** - 5 lines of code to define an experiment.
 - **easy to scale** - 5 minutes to add a new node.
@@ -41,7 +41,7 @@ def train(params):
     model.push_to_hub('alpaca-70b')
 ```
 
-## design
+## Design
 We follow the standard pytorch workflow. Thus you can incorporate anything besides what we provide, `deepspeed`, `accelerate`, or just implement your custom `pytorch` sharding from scratch. 
 
 **Enviroment hell**
@@ -54,11 +54,11 @@ You can easily orchestrate experiments and their environments, document and trac
 No need to define [600 arguments for your experiment](https://github.com/huggingface/transformers/blob/aaccf1844eccbb90cc923378e3c37a6b143d03fb/src/transformers/training_args.py#L161). No more [yaml witchcraft](https://hydra.cc/).
 You can use whatever you want, whenever you want. We just introduce a simple interface to define your experiments. We have even taken it further, now you only need to design the way to interact.
 
-## tutorial
+## Tutorial
 
 <blockquote> <i><p style="margin-right: 0;"><big>"Simplicity is prerequisite for reliability."</big></p> <footer> — Edsger W. Dijkstra</footer></i> </blockquote>
 
-## initialize the project
+## Initialize the project
 
 ```bash
 $ higgsfield init my_llama_project
@@ -79,7 +79,7 @@ my_llama_project
 ```
 </details>
 
-## setup the environment
+## Setup the environment
 Get into the project folder:
 ```bash
 $ cd my_llama_project
@@ -121,7 +121,7 @@ WAN_DB_TOKEN = os.environ.get("WAN_DB_TOKEN", None)
 You should fill those fields with your own configuration.
 </details>
 
-## setup git
+## Setup git
 
 You should create [a new git repository](https://github.com/new) in Github. Make sure you won't create any `README`, `.gitignore` or `LICENSE` files. 
 <details>
@@ -141,7 +141,7 @@ Then follow the first option in the Github page to push an existing repository f
 
 </details>
 
-## time to setup your nodes!
+## Time to setup your nodes!
 
 Now you should setup your nodes. You can do it running:
 ```bash
@@ -171,7 +171,7 @@ If it's not because of that, then you should try to properly setup your SSH key 
 </details>
 
 
-## run your first experiment
+## Run your very first experiment
 
 You're very close to run your first experiment. Take a look at the `src/experiment.py`.
 ```python

@@ -2,19 +2,19 @@
 
 ![architecture](./docs/static/architecture.png)
 
-## `installation`
+## install
 ```bash
 $ pip install higgsfield
 ```
 
-## `why? 5x5`
+## why?
 - **easy to setup** - 5 minutes to setup your environment and start training on your nodes.
 - **easy to use** - 5 lines of code to define an experiment.
 - **easy to scale** - 5 minutes to add a new node.
 - **easy to reproduce** - 5 minutes to reproduce an experiment.
 - **easy to track** - 5 minutes to track your experiments.
 
-## `train example`
+## train example
 That's all you have to do in order to train LLaMa in a distributed setting:
 ```python
 from higgsfield.llama import Llama70b
@@ -41,7 +41,7 @@ def train(params):
     model.push_to_hub('alpaca-70b')
 ```
 
-## `design`
+## design
 We follow the standard pytorch workflow. Thus you can incorporate anything besides what we provide, `deepspeed`, `accelerate`, or just implement your custom `pytorch` sharding from scratch. 
 
 **Enviroment hell**
@@ -54,14 +54,11 @@ You can easily orchestrate experiments and their environments, document and trac
 No need to define [600 arguments for your experiment](https://github.com/huggingface/transformers/blob/aaccf1844eccbb90cc923378e3c37a6b143d03fb/src/transformers/training_args.py#L161). No more [yaml witchcraft](https://hydra.cc/).
 You can use whatever you want, whenever you want. We just introduce a simple interface to define your experiments. We have even taken it further, now you only need to design the way to interact.
 
-## `tutorial`
+## tutorial
 
-<blockquote style="text-align:right;
-    border-right: 2px solid #000;
-    padding-right: 20px;
-    margin-right: 0;" class="blockquote-right"> <i><p style="margin-right: 0;"><big>"Simplicity is prerequisite for reliability."</big></p> <footer> — Edsger W. Dijkstra</footer></i> </blockquote>
+<blockquote> <i><p style="margin-right: 0;"><big>"Simplicity is prerequisite for reliability."</big></p> <footer> — Edsger W. Dijkstra</footer></i> </blockquote>
 
-## Initialize the project
+## initialize the project
 
 ```bash
 $ higgsfield init my_llama_project
@@ -82,7 +79,7 @@ my_llama_project
 ```
 </details>
 
-## Setup the environment
+## setup the environment
 Get into the project folder:
 ```bash
 $ cd my_llama_project
@@ -124,7 +121,7 @@ WAN_DB_TOKEN = os.environ.get("WAN_DB_TOKEN", None)
 You should fill those fields with your own configuration.
 </details>
 
-## Setup Git
+## setup git
 
 You should create [a new git repository](https://github.com/new) in Github. Make sure you won't create any `README`, `.gitignore` or `LICENSE` files. 
 <details>
@@ -144,7 +141,7 @@ Then follow the first option in the Github page to push an existing repository f
 
 </details>
 
-## Time to setup your Nodes!
+## time to setup your nodes!
 
 Now you should setup your nodes. You can do it running:
 ```bash
@@ -174,7 +171,7 @@ If it's not because of that, then you should try to properly setup your SSH key 
 </details>
 
 
-## Run your first experiment
+## run your first experiment
 
 You're very close to run your first experiment. Take a look at the `src/experiment.py`.
 ```python
@@ -198,7 +195,7 @@ Notice anything new? It's a new folder named `.github/workflows` with the follow
 ```
 <details>
 <summary>Curious about them?</summary>
-These files were exactly inteded to be your entrypoint to the simplified deploy of your experiments. Now you can just push your code to Github, and it will automatically deploy the code on your nodes. Not only that, it will also allow you to run your training experiments and save the checkpoints!
+These files were exactly intended to be your entrypoint to the simplified deploy of your experiments. Now you can just push your code to Github, and it will automatically deploy the code on your nodes. Not only that, it will also allow you to run your training experiments and save the checkpoints!
 </details>
 
 

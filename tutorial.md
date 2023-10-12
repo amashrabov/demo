@@ -78,7 +78,7 @@ train_loader = LlamaLoader(
 ```
 
 ### Optimizing the Model Parameters
-Higgsfield's distributed model works with standard Pytorch training flow. 
+Higgsfield's distributed model works with standard PyTorch training flow. 
 Creating optimizer and learning scheduler.
 ```python
 optimizer = optim.AdamW(
@@ -125,7 +125,7 @@ model.push_to_hub("alpaca-70b")
 ```
 
 ## Training stabilization techniques 
-Besause we follow standard pytorh workflow. It's easy to use and customize different training techniques.
+It's easy to use and customize different training techniques because we follow standard PyTorch workflow.
 
 ### Gradient accumulation
 

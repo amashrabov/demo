@@ -1,6 +1,7 @@
 # higgsfield - multi node training without crying
+Now you can setup LLaMa2 70b SFT in 5 minutes.
 
-![architecture](./docs/static/architecture.png)
+[![PyPI version](https://badge.fury.io/py/higgsfield.svg)](https://badge.fury.io/py/higgsfield)
 
 ## Install
 ```bash
@@ -13,12 +14,6 @@ $ pip install higgsfield
 - **easy to scale** - 5 minutes to add a new node.
 - **easy to reproduce** - 5 minutes to reproduce an experiment.
 - **easy to track** - 5 minutes to track your experiments.
-
-## How it's all done?
-1. We install all the required tools in your server (Docker, your project's deploy keys, higgsfield binary).
-2. Then we generate deploy & run workflows for your experiments.
-3. As soon as it gets into Github, it will automatically deploy your code on your nodes.
-4. Then you access your experiments' run UI through Github, which will launch experiments and save the checkpoints.
 
 
 ## Train example
@@ -48,6 +43,14 @@ def train(params):
     model.push_to_hub('alpaca-70b')
 ```
 
+## How it's all done?
+![architecture](./docs/static/architecture.png)
+1. We install all the required tools in your server (Docker, your project's deploy keys, higgsfield binary).
+2. Then we generate deploy & run workflows for your experiments.
+3. As soon as it gets into Github, it will automatically deploy your code on your nodes.
+4. Then you access your experiments' run UI through Github, which will launch experiments and save the checkpoints.
+
+
 ## Design
 We follow the standard pytorch workflow. Thus you can incorporate anything besides what we provide, `deepspeed`, `accelerate`, or just implement your custom `pytorch` sharding from scratch. 
 
@@ -60,6 +63,18 @@ You can easily orchestrate experiments and their environments, document and trac
 
 No need to define [600 arguments for your experiment](https://github.com/huggingface/transformers/blob/aaccf1844eccbb90cc923378e3c37a6b143d03fb/src/transformers/training_args.py#L161). No more [yaml witchcraft](https://hydra.cc/).
 You can use whatever you want, whenever you want. We just introduce a simple interface to define your experiments. We have even taken it further, now you only need to design the way to interact.
+
+## Compatibility
+**We need you to have nodes with:**
+ - Ubuntu
+ - SSH access
+ - Non-root user with sudo privileges (no-password is required)
+
+**Clouds we have tested on:**
+ - LambdaLabs
+ - FluidStack
+
+Feel free to open an issue if you have any problems with other clouds. 
 
 ## Setup tutorial
 

@@ -18,7 +18,7 @@ $ pip install higgsfield
 1. We install all the required tools in your server (Docker, your project's deploy keys, higgsfield binary).
 2. Then we generate deploy & run workflows for your experiments.
 3. As soon as it gets into Github, it will automatically deploy your code on your nodes.
-4. Then it will run your experiment and save the checkpoints.
+4. Then you access your experiments' run UI through Github, which will launch experiments and save the checkpoints.
 
 
 ## Train example

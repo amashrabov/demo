@@ -14,7 +14,14 @@ $ pip install higgsfield
 - **easy to reproduce** - 5 minutes to reproduce an experiment.
 - **easy to track** - 5 minutes to track your experiments.
 
-## train example
+## How it's all done?
+1. We install all the required tools in your server (Docker, your project's deploy keys, higgsfield binary).
+2. Then we generate deploy & run workflows for your experiments.
+3. As soon as it gets into Github, it will automatically deploy your code on your nodes.
+4. Then it will run your experiment and save the checkpoints.
+
+
+## Train example
 That's all you have to do in order to train LLaMa in a distributed setting:
 ```python
 from higgsfield.llama import Llama70b
